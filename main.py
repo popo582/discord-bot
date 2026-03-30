@@ -223,7 +223,9 @@ async def ask(interaction: discord.Interaction, question: str):
 # =========================
 @client.event
 async def on_ready():
-    await tree.sync()
+    guild = discord.Object(id=1439948972411326607)
+    await tree.sync(guild=guild)
+    print(f"Synced commands to {guild.id}")
     print(f"Logged in as {client.user}")
 
 client.run(TOKEN)
