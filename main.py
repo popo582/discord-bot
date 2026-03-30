@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 
 load_dotenv()  # loads .env locally if you have it
 
-TOKEN = os.getenv("TOKEN")  # make sure .env or Railway variable matches
+TOKEN = os.getenv("TOKEN")
+print("DEBUG TOKEN:", TOKEN)
 
 intents = discord.Intents.default()
 intents.message_content = True
