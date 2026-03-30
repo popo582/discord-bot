@@ -1,9 +1,13 @@
 import discord
 from discord import app_commands
+from discord.ext import commands
 import os
-import random
+import random  # ✅ missing import
+from dotenv import load_dotenv
 
-TOKEN = os.getenv("TOKEN")
+load_dotenv()  # loads .env locally if you have it
+
+TOKEN = os.getenv("DISCORD_TOKEN")  # make sure .env or Railway variable matches
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -13,6 +17,7 @@ tree = app_commands.CommandTree(client)
 
 scores = {}
 
+# ---- Commands ----
 @tree.command(name="roll", description="Roll a dice (1-6)")
 async def roll(interaction: discord.Interaction):
     number = random.randint(1, 6)
@@ -46,6 +51,7 @@ async def rps(interaction: discord.Interaction, choice: str):
         f"You chose **{choice}**\nBot chose **{bot_choice}**\n👉 {result}"
     )
 
+# Trivia
 questions = [
     {"q": "What is the capital of India?", "a": "delhi"},
     {"q": "2 + 2 = ?", "a": "4"},
@@ -55,7 +61,6 @@ questions = [
 @tree.command(name="trivia", description="Answer a trivia question")
 async def trivia(interaction: discord.Interaction):
     question = random.choice(questions)
-
     await interaction.response.send_message(f"❓ {question['q']}")
 
     def check(m):
@@ -63,10 +68,8 @@ async def trivia(interaction: discord.Interaction):
 
     try:
         msg = await client.wait_for("message", timeout=15.0, check=check)
-
         user_answer = msg.content.lower().strip()
         correct_answer = question["a"].lower().strip()
-
         user_id = interaction.user.id
 
         if user_id not in scores:
@@ -74,13 +77,9 @@ async def trivia(interaction: discord.Interaction):
 
         if user_answer == correct_answer:
             scores[user_id] += 1
-            await interaction.followup.send(
-                f"✅ Correct! 🎉\n🏆 Your score: {scores[user_id]}"
-            )
+            await interaction.followup.send(f"✅ Correct! 🎉\n🏆 Your score: {scores[user_id]}")
         else:
-            await interaction.followup.send(
-                f"❌ Wrong! Answer: {question['a']}\n🏆 Your score: {scores[user_id]}"
-            )
+            await interaction.followup.send(f"❌ Wrong! Answer: {question['a']}\n🏆 Your score: {scores[user_id]}")
 
     except:
         await interaction.followup.send("⏰ Time's up!")
@@ -88,15 +87,15 @@ async def trivia(interaction: discord.Interaction):
 @tree.command(name="score", description="Check your score")
 async def score(interaction: discord.Interaction):
     user_id = interaction.user.id
-
     if user_id not in scores:
         scores[user_id] = 0
-
     await interaction.response.send_message(f"🏆 Your score: {scores[user_id]}")
 
+# On ready
 @client.event
 async def on_ready():
     await tree.sync()
     print(f"Logged in as {client.user}")
 
+# Run bot
 client.run(TOKEN)
